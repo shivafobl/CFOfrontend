@@ -1,0 +1,1273 @@
+
+// import React, { useState, useEffect } from 'react';
+// import axios from 'axios';
+// import { Utensils, Pizza, Salad } from 'lucide-react';
+
+// const DashboardPage = () => {
+//   const employeeId = localStorage.getItem('employeeId');
+//   const user = JSON.parse(localStorage.getItem('user'));
+//   const name = user?.name;
+//   const today = new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000).toISOString().split("T")[0];
+
+
+//   const [employeeName, setEmployeeName] = useState('');
+//   const [vendors, setVendors] = useState([]);
+//   const [vendorId, setVendorId] = useState('');
+//   const [mealType, setMealType] = useState('');
+//   const [menuItems, setMenuItems] = useState([]);
+//   const [selectedItems, setSelectedItems] = useState([]);
+//   const [orderSummary, setOrderSummary] = useState(null);
+//   const [orderDate, setOrderDate] = useState(today);
+//   const [errors, setErrors] = useState({});
+//   const [showSummary, setShowSummary] = useState(false);
+
+
+//   useEffect(() => {
+//     if (employeeId) {
+//       axios
+//         .get(`http://localhost:5000/api/employees/${employeeId}`)
+//         .then((res) => setEmployeeName(res.data.name))
+//         .catch((err) => console.error('Error fetching name', err));
+//     }
+//   }, [employeeId]);
+
+//   useEffect(() => {
+//     axios
+//       .get('http://localhost:5000/api/vendors')
+//       .then((res) => setVendors(res.data))
+//       .catch((err) => console.error('Error fetching vendors', err));
+//   }, []);
+
+//   useEffect(() => {
+//     let newErrors = {};
+//     if (!mealType) {
+//       newErrors.mealType = 'Please select a meal type';
+//     }
+//     if (!orderDate) {
+//       newErrors.orderDate = 'Please select a date';
+//     }
+//     if (!vendorId) {
+//       newErrors.vendorId = 'Please choose a vendor';
+//     }
+//     if (selectedItems.length === 0) {
+//       newErrors.selectedItems = 'Please select at least one item';
+//     }
+//     setErrors(newErrors);
+//   }, [mealType, orderDate, vendorId, selectedItems]);
+
+//   useEffect(() => {
+//     if (vendorId && mealType) {
+//       axios
+//         .get(`http://localhost:5000/api/menus?vendor_id=${vendorId}&meal_type=${mealType}`)
+//         .then((res) => setMenuItems(res.data))
+//         .catch((err) => console.error('Error fetching menu', err));
+//     } else {
+//       setMenuItems([]);
+//     }
+//   }, [vendorId, mealType]);
+
+//   const toggleItem = (item) => {
+//     setSelectedItems((prev) => {
+//       const existingItem = prev.find((i) => i.id === item.id);
+//       if (existingItem) {
+//         return prev.map((i) =>
+//           i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+//         );
+//       }
+//       return [...prev, { ...item, quantity: 1 }];
+//     });
+//   };
+
+//   const removeItem = (item) => {
+//     setSelectedItems((prev) =>
+//       prev
+//         .map((i) =>
+//           i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i
+//         )
+//         .filter((i) => i.quantity > 0)
+//     );
+//   };
+
+//   const calculateTotal = () =>
+//     selectedItems.reduce((acc, item) => acc + parseFloat(item.price) * item.quantity, 0);
+
+// const handleOrder = () => {
+//   const now = new Date();
+
+//   // Use mealType state from component
+//   const selectedMealType = mealType || 'Lunch'; // fallback if empty
+
+//   const newOrderNo = Math.floor(100000 + Math.random() * 900000);
+//   const todayDate = now.toISOString().split('T')[0];
+
+//   const summary = {
+//     orderNo: newOrderNo,
+//     date: todayDate,
+//     meal_type: selectedMealType,
+//     items: selectedItems.map((i) => ({
+//       menu_item: i.menu_item,
+//       quantity: i.quantity,
+//     })),
+//     total: calculateTotal(),
+//   };
+
+//   setOrderSummary(summary);
+//   setShowSummary(true);
+//   setTimeout(() => {
+//     setShowSummary(false);
+//   }, 10000);
+
+//   const token = localStorage.getItem('token');
+//   axios
+//     .post(
+//       'http://localhost:5000/api/orders',
+//       {
+//         employeeId,
+//         orderNo: newOrderNo,
+//         date: todayDate,
+//         meal_type: selectedMealType,
+//         items: summary.items,
+//         total: summary.total,
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//         },
+//       }
+//     )
+//     .then((response) => {
+//       console.log('Order saved successfully:', response.data);
+//     })
+//     .catch((err) => {
+//       console.error('Error saving order:', err);
+//       alert('Error placing order: ' + (err.response?.data?.message || 'Unknown error'));
+//     });
+
+//   setSelectedItems([]);
+// };
+
+
+
+//   const logout = () => {
+//     localStorage.clear();
+//     window.location.href = '/login';
+//   };
+
+//   const orderHistory = () => {
+//     window.location.href = '/orderHistory';
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-red-100 p-4">
+//       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+//         {/* Header */}
+//         <div className="flex justify-between items-center">
+//           <h1 className="text-xl font-bold text-black">Welcome, {name || employeeName}</h1>
+//           <div className="flex space-x-4">
+//             <button
+//               onClick={orderHistory}
+//               className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+//             >
+//               Order History
+//             </button>
+//             <button
+//               onClick={logout}
+//               className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+//             >
+//               Logout
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Selection Row */}
+//         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//           <div>
+//             <label className="block mb-1 text-gray-700">Select Meal Type</label>
+//             <select
+//               value={mealType}
+//               onChange={(e) => setMealType(e.target.value)}
+//               className="w-full border rounded px-2 py-1"
+//             >
+//               <option value="">-- Select --</option>
+//               <option value="Lunch">Lunch</option>
+//               <option value="Dinner">Dinner</option>
+//             </select>
+//             {errors.mealType && <p className="text-red-500 text-sm">{errors.mealType}</p>}
+//           </div>
+//           <div>
+//             <label className="block mb-1 text-gray-700">Pick Date</label>
+//             <input
+//               type="date"
+//               value={orderDate}
+//               min={today}
+//               max={today}    // restricts date to today only
+//               onChange={(e) => setOrderDate(e.target.value)}
+//               className="w-full border rounded px-2 py-1"
+//             />
+//             {errors.orderDate && <p className="text-red-500 text-sm">{errors.orderDate}</p>}
+//           </div>
+//         </div>
+
+//         {/* Vendor Selection */}
+// <div>
+//   <h3 className="text-md font-semibold mb-2">Choose Vendor</h3>
+//   <div className="flex flex-row flex-wrap gap-4">
+//     {vendors.map((vendor) => (
+//       <button
+//         key={vendor.id}
+//         onClick={() => setVendorId(vendor.id)}
+//         className={`p-3 rounded-lg border flex items-center space-x-2 whitespace-nowrap ${
+//           vendorId === vendor.id ? 'bg-orange-200' : 'bg-white'
+//         }`}
+//       >
+//         {vendor.name.includes('Pizza') ? (
+//           <Pizza />
+//         ) : vendor.name.includes('Meals') ? (
+//           <Utensils />
+//         ) : (
+//           <Salad />
+//         )}
+//         <span>{vendor.name}</span>
+//       </button>
+//     ))}
+//   </div>
+//   {errors.vendorId && <p className="text-red-500 text-sm">{errors.vendorId}</p>}
+// </div>
+
+
+//         {/* Menu Items */}
+//         {menuItems.length > 0 && (
+//           <div>
+//             <h3 className="text-md font-semibold text-black mb-2">Menu Items</h3>
+//             <ul className="space-y-2">
+//               {menuItems.map((item) => (
+//                 <li key={item.id} className="flex justify-between items-center border-b pb-1">
+//                   <label className="flex items-center gap-2">
+//                     <input
+//                       type="checkbox"
+//                       checked={selectedItems.some((i) => i.id === item.id)}
+//                       onChange={() => toggleItem(item)}
+//                     />
+//                     {item.menu_item}
+//                   </label>
+//                   <span className="text-black font-medium">₹{item.price}</span>
+//                   {selectedItems.some((i) => i.id === item.id) && (
+//                     <div className="flex items-center space-x-2">
+//                       <button
+//                         onClick={() => removeItem(item)}
+//                         className="text-red-500 hover:text-red-600"
+//                       >
+//                         -
+//                       </button>
+//                       <span>{selectedItems.find((i) => i.id === item.id)?.quantity}</span>
+//                       <button
+//                         onClick={() => toggleItem(item)}
+//                         className="text-green-500 hover:text-green-600"
+//                       >
+//                         +
+//                       </button>
+//                     </div>
+//                   )}
+//                 </li>
+//               ))}
+//             </ul>
+//             {errors.selectedItems && <p className="text-red-500 text-sm">{errors.selectedItems}</p>}
+//             <button
+//               onClick={handleOrder}
+//               disabled={Object.keys(errors).length > 0}
+//               className="mt-4 w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+//             >
+//               Place Order
+//             </button>
+//           </div>
+//         )}
+
+       
+//         {showSummary && orderSummary && (
+//   <div className="fixed top-5 right-5 bg-green-100 border border-green-400 text-green-800 p-4 rounded shadow-md z-50 transition-opacity duration-300">
+//     <h3 className="text-md font-bold mb-2">Order Summary</h3>
+//     <p><strong>Order No:</strong> #{orderSummary.orderNo}</p>
+//     <p><strong>Date:</strong> {orderSummary.date}</p>
+//     <ul className="list-disc ml-6 mb-2 text-sm">
+//       {orderSummary.items.map((item, i) => (
+//         <li key={i}>
+//           {item.menu_item} x {item.quantity}
+//         </li>
+//       ))}
+//     </ul>
+//     <p className="font-bold">Total: ₹{orderSummary.total.toFixed(2)}</p>
+//   </div>
+// )}
+
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default DashboardPage;
+
+// import React, { useState, useEffect } from 'react';
+// import axios from 'axios';
+// import { Utensils, Pizza, Salad } from 'lucide-react';
+
+// const DashboardPage = () => {
+//   const employeeId = localStorage.getItem('employeeId');
+//   const user = JSON.parse(localStorage.getItem('user'));
+//   const name = user?.name;
+//   const today = new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000).toISOString().split("T")[0];
+
+//   const [employeeName, setEmployeeName] = useState('');
+//   const [vendors, setVendors] = useState([]);
+//   const [vendorId, setVendorId] = useState('');
+//   const [mealType, setMealType] = useState('');
+//   const [menuItems, setMenuItems] = useState([]);
+//   const [selectedItems, setSelectedItems] = useState([]);
+//   const [orderSummary, setOrderSummary] = useState(null);
+//   const [orderDate, setOrderDate] = useState(today);
+//   const [errors, setErrors] = useState({});
+//   const [showSummary, setShowSummary] = useState(false);
+// // Fetch employee name
+//   useEffect(() => {
+//     if (employeeId) {
+//       axios
+//         .get(`http://localhost:5000/api/employees/${employeeId}`)
+//         .then((res) => setEmployeeName(res.data.name))
+//         .catch((err) => console.error('Error fetching name', err));
+//     }
+//   }, [employeeId]);
+// // Fetch vendors
+//   useEffect(() => {
+//     axios
+//       .get('http://localhost:5000/api/vendors')
+//       .then((res) => setVendors(res.data))
+//       .catch((err) => console.error('Error fetching vendors', err));
+//   }, []);
+// // Validate inputs
+//   useEffect(() => {
+//     let newErrors = {};
+//     if (!mealType) {
+//       newErrors.mealType = 'Please select a meal type';
+//     }
+//     if (!orderDate) {
+//       newErrors.orderDate = 'Please select a date';
+//     }
+//     if (!vendorId) {
+//       newErrors.vendorId = 'Please choose a vendor';
+//     }
+//     if (selectedItems.length === 0) {
+//       newErrors.selectedItems = 'Please select at least one item';
+//     }
+//     setErrors(newErrors);
+//   }, [mealType, orderDate, vendorId, selectedItems]);
+// // Fetch menu items based on vendor and meal type
+//   useEffect(() => {
+//     if (vendorId && mealType) {
+//       axios
+//         .get(`http://localhost:5000/api/menus?vendor_id=${vendorId}&meal_type=${mealType}`)
+//         .then((res) => setMenuItems(res.data))
+//         .catch((err) => console.error('Error fetching menu', err));
+//     } else {
+//       setMenuItems([]);
+//     }
+//   }, [vendorId, mealType]);
+// //cutoff times  
+// const [cutoffTimes, setCutoffTimes] = useState({
+//     lunchCutoff: '10:00',
+//     dinnerCutoff: '16:00',
+//   });
+//  useEffect(() => {
+//     axios.get('http://localhost:5000/api/orders/cutoff-times')
+//       .then(res => {
+//         setCutoffTimes({
+//           lunchCutoff: res.data.lunchCutoff,
+//           dinnerCutoff: res.data.dinnerCutoff,
+//         });
+//       })
+//       .catch(err => {
+//         console.error('Failed to fetch cutoff times', err);
+//       });
+//   }, []);
+
+// // Toggle item selection
+//   const toggleItem = (item) => {
+//     setSelectedItems((prev) => {
+//       const existingItem = prev.find((i) => i.id === item.id);
+//       if (existingItem) {
+//         return prev.map((i) =>
+//           i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+//         );
+//       }
+//       return [...prev, { ...item, quantity: 1 }];
+//     });
+//   };
+// // Remove item or decrease quantity
+//   const removeItem = (item) => {
+//     setSelectedItems((prev) =>
+//       prev
+//         .map((i) =>
+//           i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i
+//         )
+//         .filter((i) => i.quantity > 0)
+//     );
+//   };
+// // Calculate total price of selected items
+//   const calculateTotal = () =>
+//     selectedItems.reduce((acc, item) => acc + parseFloat(item.price) * item.quantity, 0);
+// // Handle order submission
+// const handleOrder = () => {
+//   const now = new Date();
+
+//   // Safety check for cutoffTimes
+//   if (!cutoffTimes?.lunchCutoff || !cutoffTimes?.dinnerCutoff) {
+//     console.error('Cutoff times are missing or undefined:', cutoffTimes);
+//     alert('Cutoff times are not available. Please try again later.');
+//     return;
+//   }
+
+//   // Parse cutoff times safely
+//   const [lunchHour, lunchMinute] = cutoffTimes.lunchCutoff.split(':').map(Number);
+//   const [dinnerHour, dinnerMinute] = cutoffTimes.dinnerCutoff.split(':').map(Number);
+
+//   const lunchCutoff = new Date();
+//   lunchCutoff.setHours(lunchHour, lunchMinute, 0, 0);
+
+//   const dinnerCutoff = new Date();
+//   dinnerCutoff.setHours(dinnerHour, dinnerMinute, 0, 0);
+
+//   const selectedMealType = mealType || 'Lunch'; // fallback if empty
+
+//   console.log('Now:', now);
+//   console.log('Lunch Cutoff:', lunchCutoff);
+//   console.log('Dinner Cutoff:', dinnerCutoff);
+
+//   // Check cutoff based on meal type
+//   const isBeforeCutoff =
+//     (selectedMealType === 'Lunch' && now < lunchCutoff) ||
+//     (selectedMealType === 'Dinner' && now < dinnerCutoff);
+
+//   console.log('isBeforeCutoff:', isBeforeCutoff);
+
+//   const newOrderNo = Math.floor(100000 + Math.random() * 900000);
+//   const todayDate = now.toISOString().split('T')[0];
+
+//   const summary = {
+//     orderNo: newOrderNo,
+//     date: todayDate,
+//     meal_type: selectedMealType,
+//     items: selectedItems.map((i) => ({
+//       menu_item: i.menu_item,
+//       quantity: i.quantity,
+//     })),
+//     total: calculateTotal(),
+//   };
+
+//   console.log('cutoffTimes valid, summary:', summary);
+
+//   if (isBeforeCutoff) {
+//     setOrderSummary(summary);
+//     setShowSummary(true);
+//     setTimeout(() => {
+//       setShowSummary(false);
+//     }, 10000);
+//   } else {
+//     alert(`${selectedMealType} order cutoff time has passed.`);
+//     return;
+//   }
+
+//   const token = localStorage.getItem('token');
+//   axios
+//     .post(
+//       'http://localhost:5000/api/orders',
+//       {
+//         employeeId,
+//         orderNo: newOrderNo,
+//         date: todayDate,
+//         meal_type: selectedMealType,
+//         items: summary.items,
+//         total: summary.total,
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//         },
+//       }
+//     )
+//     .then((response) => {
+//       console.log('Order saved successfully:', response.data);
+//     })
+//     .catch((err) => {
+//       console.error('Error saving order:', err);
+//       alert('Error placing order: ' + (err.response?.data?.message || 'Unknown error'));
+//     });
+
+//   setSelectedItems([]);
+// };
+
+
+
+//   const logout = () => {
+//     localStorage.clear();
+//     window.location.href = '/login';
+//   };
+
+//   const orderHistory = () => {
+//     window.location.href = '/orderHistory';
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-red-100 p-4">
+//       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+//         {/* Header */}
+//         <div className="flex justify-between items-center">
+//           <h1 className="text-xl font-bold text-black">Welcome, {name || employeeName}</h1>
+//           <div className="flex space-x-4">
+//             <button
+//               onClick={orderHistory}
+//               className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+//             >
+//               Order History
+//             </button>
+//             <button
+//               onClick={logout}
+//               className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+//             >
+//               Logout
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Selection Row */}
+//         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//           <div>
+//             <label className="block mb-1 text-gray-700">Select Meal Type</label>
+//             <select
+//               value={mealType}
+//               onChange={(e) => setMealType(e.target.value)}
+//               className="w-full border rounded px-2 py-1"
+//             >
+//               <option value="">-- Select --</option>
+//               <option value="Lunch">Lunch</option>
+//               <option value="Dinner">Dinner</option>
+//             </select>
+//             {errors.mealType && <p className="text-red-500 text-sm">{errors.mealType}</p>}
+//           </div>
+//           <div>
+//             <label className="block mb-1 text-gray-700">Pick Date</label>
+//             <input
+//               type="date"
+//               value={orderDate}
+//               min={today}
+//               max={today}    // restrict date to today only
+//               onChange={(e) => setOrderDate(e.target.value)}
+//               className="w-full border rounded px-2 py-1"
+//             />
+//             {errors.orderDate && <p className="text-red-500 text-sm">{errors.orderDate}</p>}
+//           </div>
+//         </div>
+
+//         {/* Vendor Selection */}
+//         <div>
+//           <h3 className="text-md font-semibold mb-2">Choose Vendor</h3>
+//           <div className="flex flex-row flex-wrap gap-4">
+//             {vendors.map((vendor) => (
+//               <button
+//                 key={vendor.id}
+//                 onClick={() => setVendorId(vendor.id)}
+//                 className={`p-3 rounded-lg border flex items-center space-x-2 whitespace-nowrap ${
+//                   vendorId === vendor.id ? 'bg-orange-200' : 'bg-white'
+//                 }`}
+//               >
+//                 {vendor.name.includes('Pizza') ? (
+//                   <Pizza />
+//                 ) : vendor.name.includes('Meals') ? (
+//                   <Utensils />
+//                 ) : (
+//                   <Salad />
+//                 )}
+//                 <span>{vendor.name}</span>
+//               </button>
+//             ))}
+//           </div>
+//           {errors.vendorId && <p className="text-red-500 text-sm">{errors.vendorId}</p>}
+//         </div>
+
+//         {/* Menu Items */}
+//         {menuItems.length > 0 && (
+//           <div>
+//             <h3 className="text-md font-semibold text-black mb-2">Menu Items</h3>
+//             <ul className="space-y-2">
+//               {menuItems.map((item) => (
+//                 <li key={item.id} className="flex justify-between items-center border-b pb-1">
+//                   <label className="flex items-center gap-2">
+//                     <input
+//                       type="checkbox"
+//                       checked={selectedItems.some((i) => i.id === item.id)}
+//                       onChange={() => toggleItem(item)}
+//                     />
+//                     {item.menu_item}
+//                   </label>
+//                   <span className="text-black font-medium">₹{item.price}</span>
+//                   {selectedItems.some((i) => i.id === item.id) && (
+//                     <div className="flex items-center space-x-2">
+//                       <button
+//                         onClick={() => removeItem(item)}
+//                         className="text-red-500 hover:text-red-600"
+//                       >
+//                         -
+//                       </button>
+//                       <span>{selectedItems.find((i) => i.id === item.id)?.quantity}</span>
+//                       <button
+//                         onClick={() => toggleItem(item)}
+//                         className="text-green-500 hover:text-green-600"
+//                       >
+//                         +
+//                       </button>
+//                     </div>
+//                   )}
+//                 </li>
+//               ))}
+//             </ul>
+//             {errors.selectedItems && <p className="text-red-500 text-sm">{errors.selectedItems}</p>}
+//             <button
+//               onClick={handleOrder}
+//               disabled={Object.keys(errors).length > 0}
+//               className="mt-4 w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+//             >
+//               Place Order
+//             </button>
+//           </div>
+//         )}
+
+//         {showSummary && orderSummary && (
+//           <div className="fixed top-5 right-5 bg-green-100 border border-green-400 text-green-800 p-4 rounded shadow-md z-50 transition-opacity duration-300">
+//             <h3 className="text-md font-bold mb-2">Order Summary</h3>
+//             <p>
+//               <strong>Order No:</strong> #{orderSummary.orderNo}
+//             </p>
+//             <p>
+//               <strong>Date:</strong> {orderSummary.date}
+//             </p>
+//             <ul className="list-disc ml-6 mb-2 text-sm">
+//               {orderSummary.items.map((item, i) => (
+//                 <li key={i}>
+//                   {item.menu_item} x {item.quantity}
+//                 </li>
+//               ))}
+//             </ul>
+//             <p className="font-bold">Total: ₹{orderSummary.total.toFixed(2)}</p>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default DashboardPage;
+
+
+// import React, { useState, useEffect } from 'react';
+// import axios from 'axios';
+// import { Utensils, Pizza, Salad } from 'lucide-react';
+
+// const DashboardPage = () => {
+//   const employeeId = localStorage.getItem('employeeId');
+//   const user = JSON.parse(localStorage.getItem('user'));
+//   const name = user?.name;
+//   const today = new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000).toISOString().split("T")[0];
+
+//   const [employeeName, setEmployeeName] = useState('');
+//   const [vendors, setVendors] = useState([]);
+//   const [vendorId, setVendorId] = useState('');
+//   const [mealType, setMealType] = useState('');
+//   const [menuItems, setMenuItems] = useState([]);
+//   const [selectedItems, setSelectedItems] = useState([]);
+//   const [orderSummary, setOrderSummary] = useState(null);
+//   const [orderDate, setOrderDate] = useState(today);
+//   const [errors, setErrors] = useState({});
+//   const [showSummary, setShowSummary] = useState(false);
+//   const [cutoffTimes, setCutoffTimes] = useState({
+//     lunchCutoff: '10:00',
+//     dinnerCutoff: '16:00',
+//   });
+
+//   useEffect(() => {
+//     if (employeeId) {
+//       axios
+//         .get(`http://localhost:5000/api/employees/${employeeId}`)
+//         .then((res) => setEmployeeName(res.data.name))
+//         .catch((err) => console.error('Error fetching name', err));
+//     }
+//   }, [employeeId]);
+
+//   useEffect(() => {
+//     axios
+//       .get('http://localhost:5000/api/vendors')
+//       .then((res) => setVendors(res.data))
+//       .catch((err) => console.error('Error fetching vendors', err));
+//   }, []);
+
+//   useEffect(() => {
+//     let newErrors = {};
+//     if (!mealType) {
+//       newErrors.mealType = 'Please select a meal type';
+//     }
+//     if (!orderDate) {
+//       newErrors.orderDate = 'Please select a date';
+//     }
+//     if (!vendorId) {
+//       newErrors.vendorId = 'Please choose a vendor';
+//     }
+//     if (selectedItems.length === 0) {
+//       newErrors.selectedItems = 'Please select at least one item';
+//     }
+//     setErrors(newErrors);
+//   }, [mealType, orderDate, vendorId, selectedItems]);
+
+//   useEffect(() => {
+//     if (vendorId && mealType) {
+//       axios
+//         .get(`http://localhost:5000/api/menus?vendor_id=${vendorId}&meal_type=${mealType}`)
+//         .then((res) => setMenuItems(res.data))
+//         .catch((err) => console.error('Error fetching menu', err));
+//     } else {
+//       setMenuItems([]);
+//     }
+//   }, [vendorId, mealType]);
+
+//   useEffect(() => {
+//     axios.get('http://localhost:5000/api/orders/cutoff-times')
+//       .then(res => {
+//         setCutoffTimes({
+//           lunchCutoff: res.data.lunchCutoff,
+//           dinnerCutoff: res.data.dinnerCutoff,
+//         });
+//       })
+//       .catch(err => {
+//         console.error('Failed to fetch cutoff times', err);
+//       });
+//   }, []);
+
+//   const toggleItem = (item) => {
+//     setSelectedItems((prev) => {
+//       const existingItem = prev.find((i) => i.id === item.id);
+//       if (existingItem) {
+//         return prev.map((i) =>
+//           i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+//         );
+//       }
+//       return [...prev, { ...item, quantity: 1 }];
+//     });
+//   };
+
+//   const removeItem = (item) => {
+//     setSelectedItems((prev) =>
+//       prev
+//         .map((i) =>
+//           i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i
+//         )
+//         .filter((i) => i.quantity > 0)
+//     );
+//   };
+
+//   const calculateTotal = () =>
+//     selectedItems.reduce((acc, item) => acc + parseFloat(item.price) * item.quantity, 0);
+
+//   const handleOrder = () => {
+//     const now = new Date();
+
+//     if (!cutoffTimes?.lunchCutoff || !cutoffTimes?.dinnerCutoff) {
+//       console.error('Cutoff times are missing or undefined:', cutoffTimes);
+//       alert('Cutoff times are not available. Please try again later.');
+//       return;
+//     }
+
+//     const [lunchHour, lunchMinute] = cutoffTimes.lunchCutoff.split(':').map(Number);
+//     const [dinnerHour, dinnerMinute] = cutoffTimes.dinnerCutoff.split(':').map(Number);
+
+//     const lunchCutoff = new Date();
+//     lunchCutoff.setHours(lunchHour, lunchMinute, 0, 0);
+
+//     const dinnerCutoff = new Date();
+//     dinnerCutoff.setHours(dinnerHour, dinnerMinute, 0, 0);
+
+//     const selectedMealType = mealType || 'Lunch';
+
+//     const isBeforeCutoff =
+//       (selectedMealType === 'Lunch' && now < lunchCutoff) ||
+//       (selectedMealType === 'Dinner' && now < dinnerCutoff);
+
+//     if (!isBeforeCutoff) {
+//       alert(`${selectedMealType} order cutoff time has passed.`);
+//       return;
+//     }
+
+//     const newOrderNo = Math.floor(100000 + Math.random() * 900000);
+//     const todayDate = now.toISOString().split('T')[0];
+
+//     const summary = {
+//       orderNo: newOrderNo,
+//       date: todayDate,
+//       meal_type: selectedMealType,
+//       items: selectedItems.map((i) => ({
+//         menu_item: i.menu_item,
+//         quantity: i.quantity,
+//       })),
+//       total: calculateTotal(),
+//     };
+
+//     setOrderSummary(summary);
+//     setShowSummary(true);
+//     setTimeout(() => setShowSummary(false), 10000);
+
+//     const token = localStorage.getItem('token');
+//     axios
+//       .post(
+//         'http://localhost:5000/api/orders',
+//         {
+//           employeeId,
+//           orderNo: newOrderNo,
+//           date: todayDate,
+//           meal_type: selectedMealType,
+//           items: summary.items,
+//           total: summary.total,
+//         },
+//         {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//           },
+//         }
+//       )
+//       .then((response) => {
+//         console.log('Order saved successfully:', response.data);
+//       })
+//       .catch((err) => {
+//         console.error('Error saving order:', err);
+//         alert('Error placing order: ' + (err.response?.data?.message || 'Unknown error'));
+//       });
+
+//     setSelectedItems([]);
+//   };
+
+//   const logout = () => {
+//     localStorage.clear();
+//     window.location.href = '/login';
+//   };
+
+//   const orderHistory = () => {
+//     window.location.href = '/orderHistory';
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-red-100 p-4">
+//       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+//         {/* Header */}
+//         <div className="flex justify-between items-center">
+//           <h1 className="text-xl font-bold text-black">Welcome, {name || employeeName}</h1>
+//           <div className="flex space-x-4">
+//             <button
+//               onClick={orderHistory}
+//               className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+//             >
+//               Order History
+//             </button>
+//             <button
+//               onClick={logout}
+//               className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+//             >
+//               Logout
+//             </button>
+//           </div>
+//         </div>
+
+//         {/* Selection Row */}
+//         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//           <div>
+//             <label className="block mb-1 text-gray-700">Select Meal Type</label>
+//             <select
+//               value={mealType}
+//               onChange={(e) => setMealType(e.target.value)}
+//               className="w-full border rounded px-2 py-1"
+//             >
+//               <option value="">-- Select --</option>
+//               <option value="Lunch">Lunch</option>
+//               <option value="Dinner">Dinner</option>
+//             </select>
+//             {errors.mealType && <p className="text-red-500 text-sm">{errors.mealType}</p>}
+//           </div>
+//           <div>
+//             <label className="block mb-1 text-gray-700">Pick Date</label>
+//             <input
+//               type="date"
+//               value={orderDate}
+//               min={today}
+//               max={today}
+//               onChange={(e) => setOrderDate(e.target.value)}
+//               className="w-full border rounded px-2 py-1"
+//             />
+//             {errors.orderDate && <p className="text-red-500 text-sm">{errors.orderDate}</p>}
+//           </div>
+//         </div>
+
+//         {/* Vendor Selection */}
+//         <div>
+//           <h3 className="text-md font-semibold mb-2">Choose Vendor</h3>
+//           <div className="flex flex-row flex-wrap gap-4">
+//             {vendors.map((vendor) => (
+//               <button
+//                 key={vendor.id}
+//                 onClick={() => setVendorId(vendor.id)}
+//                 className={`p-3 rounded-lg border flex items-center space-x-2 whitespace-nowrap ${
+//                   vendorId === vendor.id ? 'bg-orange-200' : 'bg-white'
+//                 }`}
+//               >
+//                 {vendor.name.includes('Pizza') ? (
+//                   <Pizza />
+//                 ) : vendor.name.includes('Meals') ? (
+//                   <Utensils />
+//                 ) : (
+//                   <Salad />
+//                 )}
+//                 <span>{vendor.name}</span>
+//               </button>
+//             ))}
+//           </div>
+//           {errors.vendorId && <p className="text-red-500 text-sm">{errors.vendorId}</p>}
+//         </div>
+
+//         {/* Menu Items */}
+//         {menuItems.length > 0 && (
+//           <div>
+//             <h3 className="text-md font-semibold text-black mb-2">Menu Items</h3>
+//             <ul className="space-y-2">
+//               {menuItems.map((item) => (
+//                 <li key={item.id} className="flex justify-between items-center border-b pb-1">
+//                   <label className="flex items-center gap-2">
+//                     <input
+//                       type="checkbox"
+//                       checked={selectedItems.some((i) => i.id === item.id)}
+//                       onChange={() => toggleItem(item)}
+//                     />
+//                     {item.menu_item}
+//                   </label>
+//                   <span className="text-black font-medium">₹{item.price}</span>
+//                   {selectedItems.some((i) => i.id === item.id) && (
+//                     <div className="flex items-center space-x-2">
+//                       <button
+//                         onClick={() => removeItem(item)}
+//                         className="px-2 py-0.5 rounded bg-red-300 hover:bg-red-400"
+//                       >
+//                         -
+//                       </button>
+//                       <span>
+//                         {
+//                           selectedItems.find((i) => i.id === item.id)?.quantity
+//                         }
+//                       </span>
+//                       <button
+//                         onClick={() => toggleItem(item)}
+//                         className="px-2 py-0.5 rounded bg-green-300 hover:bg-green-400"
+//                       >
+//                         +
+//                       </button>
+//                     </div>
+//                   )}
+//                 </li>
+//               ))}
+//             </ul>
+//             {errors.selectedItems && (
+//               <p className="text-red-500 text-sm mt-1">{errors.selectedItems}</p>
+//             )}
+//           </div>
+//         )}
+
+//         {/* Order Summary & Place Order */}
+//         <div>
+//               <button
+//                 disabled={Object.keys(errors).length > 0}
+//                 onClick={handleOrder}
+//                 className="mt-3 w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 disabled:opacity-50"
+//               >
+//                 Place Order
+//               </button>
+//         </div>
+
+//         {/* Order Confirmation Popup */}
+//         {showSummary && orderSummary && (
+//           <div
+//             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+//             onClick={() => setShowSummary(false)}
+//           >
+//             <div
+//               className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full"
+//               onClick={(e) => e.stopPropagation()}
+//             >
+//               <h2 className="text-xl font-bold text-center text-green-600 mb-4">Order Placed Successfully!</h2>
+//               <p><strong>Order No:</strong> {orderSummary.orderNo}</p>
+//               <p><strong>Date:</strong> {orderSummary.date}</p>
+//               <p><strong>Meal Type:</strong> {orderSummary.meal_type}</p>
+//               <p><strong>Total:</strong> ₹{orderSummary.total.toFixed(2)}</p>
+//               <ul className="mt-2 space-y-1">
+//                 {orderSummary.items.map((item, index) => (
+//                   <li key={index}>
+//                     {item.menu_item} x {item.quantity}
+//                   </li>
+//                 ))}
+//               </ul>
+//               <button
+//                 onClick={() => setShowSummary(false)}
+//                 className="mt-4 w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+//               >
+//                 Close
+//               </button>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default DashboardPage;
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+
+// Import custom components
+import Header from './Header'; 
+import SelectionRow from './SelectionRow'; // Adjust the path as necessary
+import VendorSelection from './VendorSelection'; // Adjust the path as necessary
+import MenuItems from './MenuItems'; // Adjust the path as necessary
+import OrderSummary from './OrderSummary'; // Adjust the path as necessary
+
+
+const DashboardPage = () => {
+  const employeeId = localStorage.getItem('employeeId');
+  const user = JSON.parse(localStorage.getItem('user'));
+  const name = user?.name;
+  const today = new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000).toISOString().split("T")[0];
+
+  const [employeeName, setEmployeeName] = useState('');
+  const [vendors, setVendors] = useState([]);
+  const [vendorId, setVendorId] = useState('');
+  const [mealType, setMealType] = useState('');
+  const [menuItems, setMenuItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [orderSummary, setOrderSummary] = useState(null);
+  const [orderDate, setOrderDate] = useState(today);
+  const [errors, setErrors] = useState({});
+  const [showSummary, setShowSummary] = useState(false);
+  const [cutoffTimes, setCutoffTimes] = useState({
+    lunchCutoff: '10:00',
+    dinnerCutoff: '16:00',
+  });
+
+  useEffect(() => {
+    if (employeeId) {
+      axios
+        .get(`http://localhost:5000/api/employees/${employeeId}`)
+        .then((res) => setEmployeeName(res.data.name))
+        .catch((err) => console.error('Error fetching name', err));
+    }
+  }, [employeeId]);
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:5000/api/vendors')
+      .then((res) => setVendors(res.data))
+      .catch((err) => console.error('Error fetching vendors', err));
+  }, []);
+
+  useEffect(() => {
+    let newErrors = {};
+    if (!mealType) {
+      newErrors.mealType = 'Please select a meal type';
+    }
+    if (!orderDate) {
+      newErrors.orderDate = 'Please select a date';
+    }
+    if (!vendorId) {
+      newErrors.vendorId = 'Please choose a vendor';
+    }
+    if (selectedItems.length === 0) {
+      newErrors.selectedItems = 'Please select at least one item';
+    }
+    setErrors(newErrors);
+  }, [mealType, orderDate, vendorId, selectedItems]);
+
+  useEffect(() => {
+    if (vendorId && mealType) {
+      axios
+        .get(`http://localhost:5000/api/menus?vendor_id=${vendorId}&meal_type=${mealType}`)
+        .then((res) => setMenuItems(res.data))
+        .catch((err) => console.error('Error fetching menu', err));
+    } else {
+      setMenuItems([]);
+    }
+  }, [vendorId, mealType]);
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/orders/cutoff-times')
+      .then(res => {
+        setCutoffTimes({
+          lunchCutoff: res.data.lunchCutoff,
+          dinnerCutoff: res.data.dinnerCutoff,
+        });
+      })
+      .catch(err => {
+        console.error('Failed to fetch cutoff times', err);
+      });
+  }, []);
+
+  const toggleItem = (item) => {
+    setSelectedItems((prev) => {
+      const existingItem = prev.find((i) => i.id === item.id);
+      if (existingItem) {
+        return prev.map((i) =>
+          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      }
+      return [...prev, { ...item, quantity: 1 }];
+    });
+  };
+
+  const removeItem = (item) => {
+    setSelectedItems((prev) =>
+      prev
+        .map((i) =>
+          i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i
+        )
+        .filter((i) => i.quantity > 0)
+    );
+  };
+
+  const calculateTotal = () =>
+    selectedItems.reduce((acc, item) => acc + parseFloat(item.price) * item.quantity, 0);
+
+  const handleOrder = () => {
+    const now = new Date();
+
+    if (!cutoffTimes?.lunchCutoff || !cutoffTimes?.dinnerCutoff) {
+      console.error('Cutoff times are missing or undefined:', cutoffTimes);
+      alert('Cutoff times are not available. Please try again later.');
+      return;
+    }
+
+    const [lunchHour, lunchMinute] = cutoffTimes.lunchCutoff.split(':').map(Number);
+    const [dinnerHour, dinnerMinute] = cutoffTimes.dinnerCutoff.split(':').map(Number);
+
+    const lunchCutoff = new Date();
+    lunchCutoff.setHours(lunchHour, lunchMinute, 0, 0);
+
+    const dinnerCutoff = new Date();
+    dinnerCutoff.setHours(dinnerHour, dinnerMinute, 0, 0);
+
+    const selectedMealType = mealType || 'Lunch';
+
+    const isBeforeCutoff =
+      (selectedMealType === 'Lunch' && now < lunchCutoff) ||
+      (selectedMealType === 'Dinner' && now < dinnerCutoff);
+
+    if (!isBeforeCutoff) {
+      alert(`${selectedMealType} order cutoff time has passed.`);
+      return;
+    }
+
+    const newOrderNo = Math.floor(100000 + Math.random() * 900000);
+    const todayDate = now.toISOString().split('T')[0];
+
+    const summary = {
+      orderNo: newOrderNo,
+      date: todayDate,
+      meal_type: selectedMealType,
+      items: selectedItems.map((i) => ({
+        menu_item: i.menu_item,
+        quantity: i.quantity,
+      })),
+      total: calculateTotal(),
+    };
+
+    setOrderSummary(summary);
+    setShowSummary(true);
+    setTimeout(() => setShowSummary(false), 10000);
+
+    const token = localStorage.getItem('token');
+    axios
+      .post(
+        'http://localhost:5000/api/orders',
+        {
+          employeeId,
+          orderNo: newOrderNo,
+          date: todayDate,
+          meal_type: selectedMealType,
+          items: summary.items,
+          total: summary.total,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((response) => {
+        console.log('Order saved successfully:', response.data);
+      })
+      .catch((err) => {
+        console.error('Error saving order:', err);
+        alert('Error placing order: ' + (err.response?.data?.message || 'Unknown error'));
+      });
+
+    setSelectedItems([]);
+  };
+
+  const logout = () => {
+    localStorage.clear();
+    window.location.href = '/login';
+  };
+
+  const orderHistory = () => {
+    window.location.href = '/orderHistory';
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-red-100 p-4">
+      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
+        <Header name={name} employeeName={employeeName} orderHistory={orderHistory} logout={logout} />
+        <SelectionRow
+          mealType={mealType}
+          setMealType={setMealType}
+          orderDate={orderDate}
+          setOrderDate={setOrderDate}
+          today={today}
+          errors={errors}
+        />
+        <VendorSelection vendors={vendors} vendorId={vendorId} setVendorId={setVendorId} errors={errors} />
+        {menuItems.length > 0 && (
+          <MenuItems
+            menuItems={menuItems}
+            selectedItems={selectedItems}
+            toggleItem={toggleItem}
+            removeItem={removeItem}
+            errors={errors}
+          />
+        )}
+        <div>
+          <button
+            disabled={Object.keys(errors).length > 0}
+            onClick={handleOrder}
+            className="mt-3 w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 disabled:opacity-50"
+          >
+            Place Order
+          </button>
+        </div>
+        <OrderSummary
+          showSummary={showSummary}
+          orderSummary={orderSummary}
+          setShowSummary={setShowSummary}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default DashboardPage;
