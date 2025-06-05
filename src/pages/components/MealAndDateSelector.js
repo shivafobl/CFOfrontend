@@ -7,7 +7,7 @@ const MealAndDateSelector = ({ mealType, setMealType, orderDate, setOrderDate, t
       <select
         value={mealType}
         onChange={(e) => setMealType(e.target.value)}
-        className="w-full border rounded px-2 py-1"
+        className="w-full max-w-xs border rounded px-2 py-1"
       >
         <option value="">-- Select --</option>
         <option value="Lunch">Lunch</option>

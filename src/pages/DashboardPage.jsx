@@ -47,7 +47,10 @@ useEffect(() => {
     if (employeeId) {
       getEmployeeName(employeeId).then((res) => setEmployeeName(res.data.name)).catch(console.error);
     }
-    getVendors().then((res) => setVendors(res.data)).catch(console.error);
+    getVendors().then((res) => {
+  console.log('Vendors API Response:', res);
+  setVendors(Array.isArray(res.data) ? res.data : []);
+}).catch(console.error);
     getCutoffTimes().then((res) => setCutoffTimes(res.data)).catch(console.error);
   }, [employeeId]);
 

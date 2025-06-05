@@ -12,6 +12,7 @@ const RegisterPage = () => {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const navigate = useNavigate();
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,7 +25,7 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
+      const response = await fetch(`${BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,33 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
- // Adjust the import path as necessary
 
-// Adjust the import path as necessary
 const LoginPage = () => {
   const [employeeId, setEmployeeId] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null); // For handling login errors
-
+  const [error, setError] = useState(null);
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
   const navigate = useNavigate();
+
+  // Check on mount if already logged in
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      setError("User is already logged in.");
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    // Check before login
+    if (localStorage.getItem("token")) {
+      setError("User is already logged in.");
+      return;
+    }
+
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", 
-        {
+      const response = await axios.post(`${BASE_URL}/api/auth/login`, {
         employee_id: employeeId,
         password,
       });
 
       if (response.status === 200) {
-        // Save the JWT token (you can also save it in localStorage or context)
         localStorage.setItem("token", response.data.token);
-        localStorage.setItem('employeeId', response.data.employeeId); // 👈 must set this
+        localStorage.setItem('employeeId', response.data.employeeId);
         localStorage.setItem("user", JSON.stringify(response.data.user));
-        console.log(response.data.user);
-        // Redirect to the homepage/dashboard
         navigate("/dashboard");
       }
     } catch (err) {
@@ -70,9 +77,20 @@ const LoginPage = () => {
           </button>
         </form>
         <p className="text-sm text-blue-600 cursor-pointer mt-2" onClick={() => navigate('/forgot-password')}>
-  Forgot Password?
-</p>
-
+          Forgot Password?
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          className="w-full mt-4 py-2 rounded-lg font-bold border-2"
+          style={{
+            background: "rgba(248,248,248,1)",
+            color: "rgba(228,113,4,1)",
+            borderColor: "rgba(228,113,4,1)",
+          }}
+        >
+          Go to Homepage
+        </button>
       </div>
     </div>
   );

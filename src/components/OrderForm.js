@@ -11,7 +11,7 @@ const OrderForm = ({ userId, vendorId, menuItems }) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/orders',
+        'http://localhost:/api/orders',
         {
           employee_id: userId,
           vendor_id: vendorId,

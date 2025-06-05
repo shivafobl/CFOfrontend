@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
 
@@ -13,8 +14,22 @@ const AdminDashboard = () => {
     { label: "Settings", path: "/admin/settings" },
   ];
 
+ 
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/admin/login");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 text-white px-5 py-2 rounded-lg shadow hover:bg-red-700 transition"
+        >
+          Logout
+        </button>
+      </div>
       <h1 className="text-3xl font-bold mb-8 text-center">Admin Dashboard</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-xl mx-auto">
         {buttons.map((btn) => (
